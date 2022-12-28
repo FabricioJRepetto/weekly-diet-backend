@@ -3,6 +3,7 @@ dotenv.config()
 import express, { json, urlencoded } from "express";
 import router from "./routes/index.js";
 import cors from "cors";
+import allowCors from './allowCors.js';
 import morgan from "morgan";
 import mongoose from "mongoose";
 const { DB_URL } = process.env;
