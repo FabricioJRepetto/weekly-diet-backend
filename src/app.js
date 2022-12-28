@@ -11,7 +11,7 @@ const { DB_URL } = process.env;
 const app = express();
 
 const corsCnfg = {
-    origin: '*'
+    origin: ['https://weekly-diet.vercel.app', 'http://localhost:3000']
 }
 
 //? Mongo
