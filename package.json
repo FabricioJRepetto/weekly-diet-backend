@@ -4,8 +4,11 @@
     "description": "weekly diet backend",
     "main": "index.js",
     "type": "module",
+    "engine": {
+        "node": "^16.x"
+    },
     "scripts": {
-        "start": "nodemon index.js"
+        "start": "node index.js"
     },
     "author": "Fabricio Repetto",
     "license": "ISC",
