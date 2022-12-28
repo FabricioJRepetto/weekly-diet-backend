@@ -10,7 +10,7 @@ const { DB_URL } = process.env;
 
 const app = express();
 
-const corsCnfg = {
+const whitelist = {
     origin: ['https://weekly-diet.vercel.app', 'http://localhost:3000']
 }
 
@@ -44,7 +44,12 @@ const mongoConn = async (req, res, next) => {
     }
 }
 
-app.use(cors(corsCnfg));
+
+app.use(allowCors())
+
+app.use(cors({
+    origin: whitelist
+}));
 
 app.use(json({ limit: "50mb" }));
 app.use(urlencoded({ extended: true, limit: "50mb" }));
