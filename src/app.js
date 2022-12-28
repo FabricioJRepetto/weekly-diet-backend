@@ -10,6 +10,10 @@ const { DB_URL } = process.env;
 
 const app = express();
 
+const corsCnfg = {
+    origin: '*'
+}
+
 //? Mongo
 mongoose.set('strictQuery', false);
 const options = {
@@ -40,8 +44,7 @@ const mongoConn = async (req, res, next) => {
     }
 }
 
-app.use(cors());
-// app.use(allowCors());
+app.use(cors(corsCnfg));
 app.use(json({ limit: "50mb" }));
 app.use(urlencoded({ extended: true, limit: "50mb" }));
 app.use(morgan("dev"));
