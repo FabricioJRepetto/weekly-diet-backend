@@ -10,10 +10,10 @@ const UserSchema = new Schema(
             required: true,
             unique: true,
         },
-        password: {
-            type: String,
-            required: true,
-        }
+        user_id: String,
+        picture: String,
+        name: String,
+        password: String
     },
     {
         versionKey: false,

@@ -44,12 +44,14 @@ const mongoConn = async (req, res, next) => {
     }
 }
 
-
+//* error de cors solucionado con
+//? allow cors modificado?
 app.use(allowCors())
-
+//? cors origin con esta sintaxis?
 app.use(cors({
     origin: whitelist
 }));
+//? o mongo generaba el problema al no tener la IP del back autorizada?
 
 app.use(json({ limit: "50mb" }));
 app.use(urlencoded({ extended: true, limit: "50mb" }));
@@ -67,7 +69,7 @@ app.use((err, req, res, next) => {
     const status = err.status || 500
     const message = err.message || err
     console.error(err)
-    return res.status(status).send(message)
+    return res.status(status).json({ error: true, message })
 });
 
 export default app
