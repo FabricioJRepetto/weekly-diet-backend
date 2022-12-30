@@ -111,7 +111,7 @@ const weekAnalist = (history, today, start) => {
 
 const getHistory = async (req, res, next) => {
     try {
-        const id = req.query?.id
+        const { id } = req?.user
         if (!id) return res.json({ error: 'user id no encontrada' })
 
         const history = await History.findOne({ user: id });
@@ -134,7 +134,7 @@ const getHistory = async (req, res, next) => {
 
 const getWeek = async (req, res, next) => {
     try {
-        const id = req.query?.id
+        const { id } = req?.user
         if (!id) return res.json({ error: 'user id no encontrada' })
 
         const history = await History.findOne({ user: id })
@@ -150,7 +150,7 @@ const getWeek = async (req, res, next) => {
 
 const getFullHistory = async (req, res, next) => {
     try {
-        const id = req.query?.id
+        const { id } = req?.user
         if (!id) return res.json({ error: 'user id no encontrada' })
 
         const history = await History.findOne({ user: id })
@@ -175,7 +175,7 @@ const getFullHistory = async (req, res, next) => {
 
 const addMeal = async (req, res, next) => {
     try {
-        const id = req.query?.id
+        const { id } = req?.user
         if (!id) return res.json({ error: 'user id no encontrada' })
         if (!req.body?.meal) return res.json({ error: 'body.meal no encontrada' })
 
@@ -205,9 +205,71 @@ const addMeal = async (req, res, next) => {
     }
 }
 
+const editMeal = async (req, res, next) => {
+    try {
+        const { id } = req?.user,
+            { meal, meal_id, today, start } = req?.body
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!meal) return res.json({ error: 'meal not recibed' })
+        if (!meal_id) return res.json({ error: 'meal_id not recibed' })
+
+        const newMeal = await History.findOneAndUpdate(
+            {
+                user: id,
+                'meals._id': meal_id
+            },
+            {
+                $set: {
+                    'meals.$': meal
+                }
+            },
+            { new: true }
+        )
+
+        if (newMeal) {
+            let week = weekAnalist(newMeal, today, start)
+            return res.json({ message: 'Meal updated', history: newMeal, week })
+        } else return res.json({ error: true, message: 'Something happend' })
+    } catch (err) {
+        next(err)
+    }
+}
+
+const deleteMeal = async (req, res, next) => {
+    try {
+        const { id } = req?.user,
+            { meal_id, today, start } = req?.query
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!meal_id) return res.json({ error: 'meal_id not recibed' })
+
+        const newHistory = await History.findOneAndUpdate(
+            {
+                user: id
+            },
+            {
+                $pull: {
+                    meals: { _id: meal_id }
+                }
+            },
+            { new: true }
+        )
+        console.log(newHistory);
+        const week = weekAnalist(newHistory, today, start)
+
+        return res.json({ message: 'deleted', history: newHistory, week })
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 export {
     getHistory,
     getWeek,
     getFullHistory,
-    addMeal
+    addMeal,
+    editMeal,
+    deleteMeal
 }

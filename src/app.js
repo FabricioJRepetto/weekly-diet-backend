@@ -45,7 +45,7 @@ const mongoConn = async (req, res, next) => {
 }
 
 //* error de cors solucionado con
-//? allow cors modificado?
+//? allow cors (funciona)
 app.use(allowCors())
 //? cors origin con esta sintaxis?
 app.use(cors({

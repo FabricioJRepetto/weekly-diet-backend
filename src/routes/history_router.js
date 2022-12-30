@@ -4,12 +4,16 @@ import {
     getHistory,
     getWeek,
     getFullHistory,
-    addMeal
+    addMeal,
+    editMeal,
+    deleteMeal
 } from "../controllers/history_controller.js"
 
 router.get('/', getHistory)
 router.get('/fullhistory', getFullHistory)
 router.get('/week', getWeek)
 router.post('/', addMeal)
+router.put('/', editMeal)
+router.delete('/', deleteMeal)
 
 export { router }
