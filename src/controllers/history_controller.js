@@ -16,15 +16,19 @@ const weekAnalist = (history, today, start) => {
     if (history && history.meals && history.meals.length > 0) {
         //? Separa en días
         history.meals.forEach(e => {
-            if (e.date >= start && e.date <= today) {
+            const eDate = new Date(e.date),
+                Start = new Date(start),
+                Today = new Date(today)
 
-                if (e.date === today) {
+            if (eDate >= Start && eDate <= Today) {
+
+                if (eDate === today) {
                     !aux.today && (aux.today = [])
                     aux.today.push(e)
                 }
                 if (e.vegetalC) aux.vegetalC += 1
 
-                switch (new Date(e.date).getDay()) {
+                switch (new Date(eDate).getDay()) {
                     case 1:
                         !aux.monday && (aux.monday = [])
                         aux.monday.push(e)
