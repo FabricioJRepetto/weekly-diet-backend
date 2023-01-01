@@ -22,7 +22,7 @@ const weekAnalist = (history, today, start) => {
 
             if (eDate >= Start && eDate <= Today) {
 
-                if (eDate.getTime() === today.getTime()) {
+                if (eDate.getTime() === Today.getTime()) {
                     !aux.today && (aux.today = [])
                     aux.today.push(e)
                 }
