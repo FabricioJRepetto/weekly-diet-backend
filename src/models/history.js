@@ -10,6 +10,7 @@ const HistorySchema = new Schema(
         meals: [
             {
                 protein: [],
+                foods: [],
                 carbohydrate: [],
                 vegetal: [],
                 vegetalC: Boolean,
