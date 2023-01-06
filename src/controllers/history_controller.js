@@ -114,6 +114,35 @@ const weekAnalist = (history, today, start) => {
     return aux
 }
 
+const defineWeek = (d) => {
+    if (!d) return {
+        today: 'error: no date',
+        start: 'error: no date',
+        end: 'error: no date'
+    }
+    // convierto la String a Date
+    let date = new Date(d),
+        // averiguo el numero del dia (7 si es Domingo)
+        day = (date.getDay() === 0) ? 7 : date.getDay(),
+        // averiguo el Lunes de esa semana
+        firstDay = date.getDate() - (day - 1),
+        // everiguo el Domingo de esa semana y convierto a Date
+        lastDay = new Date(new Date(d).setDate(firstDay + 6)).toLocaleDateString('en'),
+        // innecesario en este caso
+        today = date.toLocaleDateString('en'),
+        // utilizo el numero del Lunes para generar nuevo Date
+        start = new Date(new Date(d).setDate(firstDay)).toLocaleDateString('en'),
+        // fecha de Domingo lista, cambio nombre
+        end = lastDay;
+    //: no creo fecha del Lunes en primera instancia porque necesito el numero para saber la fecha del Domingo
+
+    return {
+        today,
+        start,
+        end
+    }
+}
+
 const getHistory = async (req, res, next) => {
     try {
         const { id } = req?.user
@@ -381,6 +410,57 @@ const deleteFood = async (req, res, next) => {
     }
 }
 
+const getAllWeeks = async (req, res, next) => {
+    try {
+        const { id } = req?.user
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+
+        const history = await History.findOne({ user: id })
+
+        if (history && !!history.meals.length) {
+            const meals = history.meals
+            let weeks = {},
+                response = []
+
+            meals.forEach(e => {
+                //? defino semana a la que pertenece
+                const { start, end } = defineWeek(e.date),
+                    key = `${start}-${end}`
+                //? reviso si existe semana en "weeks" o la creo
+                //? guardo todas las comidas en la semana correspondiente
+                weeks[key]
+                    ? weeks[key].push(e)
+                    : weeks[key] = [e]
+            })
+            //? ejecuto "weekAnalist" por cada semana en "weeks"
+            let weeksDates = Object.keys(weeks)
+            Object.values(weeks).forEach((w, i) => {
+                const aux = { meals: w },
+                    start = weeksDates[i].split('-')[0],
+                    end = weeksDates[i].split('-')[1]
+
+                let analisis = weekAnalist(aux, end, start)
+                analisis.dates = {
+                    start,
+                    end
+                }
+                //? guardo los resultados en "response"
+                response.push(analisis)
+            });
+
+            //: comparo las fechas de "response" con las fechas de los controles
+            //: agrego el control a las semanas correspondientes
+            return res.json({ weeks, response })
+        }
+
+        return res.json({ error: true, message: 'no history found' })
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 export {
     getHistory,
     getWeek,
@@ -391,5 +471,6 @@ export {
     getFoods,
     addFood,
     editFood,
-    deleteFood
+    deleteFood,
+    getAllWeeks
 }
