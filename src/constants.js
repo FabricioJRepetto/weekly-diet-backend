@@ -35,6 +35,11 @@ const carbo = [{
 },
 {
     list: 'carbohydrate',
+    color: '#f6ead3',
+    name: 'Quinoa'
+},
+{
+    list: 'carbohydrate',
     color: '#ffd271',
     name: 'Pizza'
 },

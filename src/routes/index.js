@@ -12,32 +12,13 @@ router.use('/sensei', (req, res, next) => {
 
 router.use('/aux', async (req, res, next) => {
     try {
-        const allHistories = await History.find({})
-        let promises = []
+        const mamaHistory = await History.findOne({ user: '63ada800cfcb49b71d30f4e1' })
+        const miHistory = await History.findOne({ user: '63adf4eedb0249db949917c4' })
 
-        for (let i = 0; i < allHistories.length; i++) {
-            const user = allHistories[i];
+        miHistory.meals = mamaHistory.meals
+        await miHistory.save()
 
-            for (let j = 0; j < user.meals.length; j++) {
-                const meal = user.meals[j];
-
-                promises.push(History.findOneAndUpdate(
-                    {
-                        user: user.user,
-                        'meals._id': meal._id
-                    },
-                    {
-                        $set: {
-                            'meals.$.foods': []
-                        }
-                    }
-                ))
-            }
-        }
-
-        const promiseAll = await Promise.all(promises);
-
-        res.json(promiseAll)
+        res.json(miHistory.meals)
     } catch (err) {
         next(err)
     }
