@@ -1,4 +1,5 @@
 import History from '../models/history.js'
+import { group } from '../constants.js'
 
 const weekAnalist = (history, today, start) => {
     let aux = {
@@ -160,16 +161,19 @@ const getFullHistory = async (req, res, next) => {
         const history = await History.findOne({ user: id })
 
         let week = weekAnalist(history, req.query.today, req.query.start)
+        let foods = history.customFoods || []
+        let g = { ...group, foods: [...group.foods, ...foods] }
 
-        if (history) return res.json({ history: history.meals, week })
+        if (history) return res.json({ history: history.meals, week, group: g })
         else {
             await History.create(
                 {
                     user: id,
-                    meals: []
+                    meals: [],
+                    customFoods: []
                 }
             )
-            return res.json({ history: [], week })
+            return res.json({ history: [], week, group: g })
         }
 
     } catch (err) {
@@ -269,11 +273,123 @@ const deleteMeal = async (req, res, next) => {
     }
 }
 
+const getFoods = async (req, res, next) => {
+    try {
+        const { id } = req?.user
+        if (!id) return res.json({ error: 'user id not recibed' })
+
+        const history = await History.findOne({ user: id })
+
+        if (!history.customFoods) return res.json({ foods: [] })
+
+        return res.json({ foods: history.customFoods })
+
+    } catch (err) {
+        next(err)
+    }
+}
+
+const addFood = async (req, res, next) => {
+    try {
+        const { id } = req?.user,
+            { food } = req?.body
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!food) return res.json({ error: 'data (food) not recibed' })
+
+        const history = await History.findOne({ user: id })
+
+        if (history) {
+            history.customFoods.push(food)
+            await history.save()
+
+            return res.json({ foods: history.customFoods, allFoods: [...group.foods, ...history.customFoods] })
+        } else {
+            const newHistory = await History.create(
+                {
+                    user: id,
+                    meals: [],
+                    customFoods: [food]
+                }
+            )
+
+            return res.json({ foods: [food], allFoods: [...group.foods, food] })
+        }
+    } catch (err) {
+        next(err)
+    }
+}
+
+const editFood = async (req, res, next) => {
+    try {
+        const { id } = req?.user,
+            { food, food_id } = req?.body
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!food) return res.json({ error: 'data (food) not recibed' })
+        if (!food_id) return res.json({ error: 'data (food_id) not recibed' })
+
+        const newFood = await History.findOneAndUpdate(
+            {
+                user: id,
+                'customFoods._id': food_id
+            },
+            {
+                $set: {
+                    'customFoods.$': food
+                }
+            },
+            { new: true }
+        )
+
+        if (newFood) return res.json(
+            {
+                message: 'Food updated',
+                foods: newFood.customFoods,
+                allFoods: [...group.foods, newFood.customFoods]
+            })
+        else return res.json({ error: true, message: 'Something happend' })
+    } catch (err) {
+        next(err)
+    }
+}
+
+const deleteFood = async (req, res, next) => {
+    try {
+        const { id } = req?.user,
+            { food_id } = req?.query
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!food_id) return res.json({ error: 'data (food_id) not recibed' })
+
+        const newHistory = await History.findOneAndUpdate(
+            {
+                user: id
+            },
+            {
+                $pull: {
+                    customFoods: { _id: food_id }
+                }
+            },
+            { new: true }
+        )
+
+        return res.json({ message: 'deleted', foods: newHistory.customFoods, allFoods: [...group.foods, ...newHistory.customFoods] })
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 export {
     getHistory,
     getWeek,
     getFullHistory,
     addMeal,
     editMeal,
-    deleteMeal
+    deleteMeal,
+    getFoods,
+    addFood,
+    editFood,
+    deleteFood
 }

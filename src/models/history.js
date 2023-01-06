@@ -9,12 +9,21 @@ const HistorySchema = new Schema(
         },
         meals: [
             {
-                protein: [],
+                protein: [String],
                 foods: [],
-                carbohydrate: [],
-                vegetal: [],
+                carbohydrate: [String],
+                vegetal: [String],
                 vegetalC: Boolean,
                 date: String
+            }
+        ],
+        customFoods: [
+            {
+                name: String,
+                mix: Boolean,
+                list: String,
+                lists: [String],
+                ingredients: [{}]
             }
         ]
     },
