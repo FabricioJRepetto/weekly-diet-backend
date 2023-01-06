@@ -188,6 +188,12 @@ const carbo = [{
         color: '#317137',
         group: 'A',
         name: 'Zapallito'
+    },
+    {
+        list: 'vegetal',
+        color: '#317137',
+        group: 'A',
+        name: 'Zucchini'
     }],
     vegB = [{
         list: 'vegetal',
