@@ -7,9 +7,9 @@ import {
     autoLogIn
 } from "../controllers/user_controller.js"
 
+router.get('/autologin', autoLogIn)
 router.post('/login', logIn)
 router.post('/signup', signUp)
 router.post('/googlelogin', google)
-router.get('/autologin', autoLogIn)
 
 export { router }

@@ -190,7 +190,7 @@ const getFullHistory = async (req, res, next) => {
         const history = await History.findOne({ user: id })
 
         let week = weekAnalist(history, req.query.today, req.query.start)
-        let foods = history.customFoods || []
+        let foods = history?.customFoods || []
         let g = { ...group, foods: [...group.foods, ...foods] }
 
         if (history) return res.json({ history: history.meals, week, group: g })

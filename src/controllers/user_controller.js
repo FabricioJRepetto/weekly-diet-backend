@@ -52,7 +52,6 @@ const verifyGoogle = async (token) => {
 
 const google = async (req, res, next) => {
     try {
-        let id = false
         const { token } = req.body,
             {
                 email,
@@ -63,7 +62,7 @@ const google = async (req, res, next) => {
 
         if (sub) {
             const userFound = await User.findOne({ user_id: sub });
-            id = userFound.id
+            let id = userFound?.id || false
 
             if (!userFound) {
                 const newUser = await User.create({
@@ -73,8 +72,8 @@ const google = async (req, res, next) => {
                     user_id: sub
                 })
                 id = newUser.id
-                // return res.json({ message: 'approved', id: newUser.id });
             }
+
             // una vez autenticado el usuario, genero un jwt 
             // con un tiempo de expiración mayor al token de google
             const aux = { id, email, name, picture };
@@ -82,10 +81,9 @@ const google = async (req, res, next) => {
                 expiresIn: 1000 * 60 * 60 * 24 * 7,
             });
 
-            //: enviarlo como cookie por headers
             return res.json({ message: 'approved', id, token });
-            //? como accedo a la cookie desde el cliente?
-
+            // enviarlo como cookie por headers
+            // como accedo a la cookie desde el cliente?
         } else {
             return res.status(403).json({
                 error: true,
