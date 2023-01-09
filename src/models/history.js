@@ -17,6 +17,16 @@ const HistorySchema = new Schema(
                 date: String
             }
         ],
+        checkpoints: [
+            {
+                date: String,
+                weight: String,
+                muscle: String,
+                fat: String,
+                abdominal: Number,
+                body_age: Number
+            }
+        ],
         customFoods: [
             {
                 name: String,

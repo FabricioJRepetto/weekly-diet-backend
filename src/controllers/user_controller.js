@@ -81,7 +81,7 @@ const google = async (req, res, next) => {
                 expiresIn: 1000 * 60 * 60 * 24 * 7,
             });
 
-            return res.json({ message: 'approved', id, token });
+            return res.json({ message: 'approved', email, id, token });
             // enviarlo como cookie por headers
             // como accedo a la cookie desde el cliente?
         } else {

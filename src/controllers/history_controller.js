@@ -155,7 +155,9 @@ const getHistory = async (req, res, next) => {
             await History.create(
                 {
                     user: id,
-                    meals: []
+                    meals: [],
+                    customFoods: [],
+                    checkpoints: []
                 }
             )
             return res.json({ history: [] })
@@ -199,7 +201,8 @@ const getFullHistory = async (req, res, next) => {
                 {
                     user: id,
                     meals: [],
-                    customFoods: []
+                    customFoods: [],
+                    checkpoints: []
                 }
             )
             return res.json({ history: [], week, group: g })
@@ -229,7 +232,9 @@ const addMeal = async (req, res, next) => {
             const newHistory = await History.create(
                 {
                     user: id,
-                    meals: [req.body.meal]
+                    meals: [req.body.meal],
+                    customFoods: [],
+                    checkpoints: []
                 }
             )
 
@@ -334,11 +339,12 @@ const addFood = async (req, res, next) => {
 
             return res.json({ foods: history.customFoods, allFoods: [...group.foods, ...history.customFoods] })
         } else {
-            const newHistory = await History.create(
+            await History.create(
                 {
                     user: id,
                     meals: [],
-                    customFoods: [food]
+                    customFoods: [food],
+                    checkpoints: []
                 }
             )
 
@@ -461,6 +467,69 @@ const getAllWeeks = async (req, res, next) => {
     }
 }
 
+const getCheckpoints = async (req, res, next) => {
+    try {
+        const { id } = req.user
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+
+        const history = await History.findOne({ user: id })
+
+        if (history) {
+            return res.json({ checkpoints: history.checkpoints })
+        } else {
+            await History.create(
+                {
+                    user: id,
+                    meals: [],
+                    customFoods: [],
+                    checkpoints: []
+                }
+            )
+
+            return res.json({ checkpoints: [] })
+        }
+
+    } catch (err) {
+        next(err)
+    }
+}
+
+const addCheckpoint = async (req, res, next) => {
+    try {
+        const { id } = req.user,
+            { checkpoint } = req.body
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!checkpoint) return res.json({ error: 'data (checkpoint) not recibed' })
+        if (!checkpoint.weight) return res.json({ error: 'data (checkpoint.weight) not recibed' })
+        if (!checkpoint.date) return res.json({ error: 'data (checkpoint.date) not recibed' })
+
+        const history = await History.findOne({ user: id })
+
+        if (history) {
+            history.checkpoints.push(checkpoint)
+            await history.save()
+
+            return res.json({ checkpoints: history.checkpoints })
+        } else {
+            await History.create(
+                {
+                    user: id,
+                    meals: [],
+                    customFoods: [],
+                    checkpoints: [checkpoint]
+                }
+            )
+
+            return res.json({ checkpoints: [checkpoint] })
+        }
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 export {
     getHistory,
     getWeek,
@@ -472,5 +541,7 @@ export {
     addFood,
     editFood,
     deleteFood,
-    getAllWeeks
+    getAllWeeks,
+    getCheckpoints,
+    addCheckpoint
 }
