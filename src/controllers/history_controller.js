@@ -425,12 +425,13 @@ const getAllWeeks = async (req, res, next) => {
         const history = await History.findOne({ user: id })
 
         if (history && !!history.meals.length) {
-            const meals = history.meals
+            const meals = history.meals,
+                checkpoints = history.checkpoints
             let weeks = {},
                 response = []
 
             meals.forEach(e => {
-                //? defino semana a la que pertenece
+                //? defino semana a la que pertenece la comida
                 const { start, end } = defineWeek(e.date),
                     key = `${start}-${end}`
                 //? reviso si existe semana en "weeks" o la creo
@@ -451,6 +452,11 @@ const getAllWeeks = async (req, res, next) => {
                     start,
                     end
                 }
+                //? y busco si hay algun control entre las fechas de esta semana
+                const checkpointFound = checkpoints.find(c => new Date(c.date) >= new Date(start) && new Date(c.date) <= new Date(end))
+                if (checkpointFound) analisis.checkpoint = checkpointFound
+                else analisis.checkpoint = checkpointFound
+
                 //? guardo los resultados en "response"
                 response.push(analisis)
             });
@@ -500,10 +506,10 @@ const addCheckpoint = async (req, res, next) => {
         const { id } = req.user,
             { checkpoint } = req.body
 
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!checkpoint) return res.json({ error: 'data (checkpoint) not recibed' })
-        if (!checkpoint.weight) return res.json({ error: 'data (checkpoint.weight) not recibed' })
-        if (!checkpoint.date) return res.json({ error: 'data (checkpoint.date) not recibed' })
+        if (!id) return res.status(400).json({ error: 'user id not recibed' })
+        if (!checkpoint) return res.status(400).json({ error: 'data (checkpoint) not recibed' })
+        if (!checkpoint.weight) return res.status(400).json({ error: 'data (checkpoint.weight) not recibed' })
+        if (!checkpoint.date) return res.status(400).json({ error: 'data (checkpoint.date) not recibed' })
 
         const history = await History.findOne({ user: id })
 
