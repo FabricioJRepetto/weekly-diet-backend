@@ -9,7 +9,7 @@ const HistorySchema = new Schema(
         },
         meals: [
             {
-                mmealType: String,
+                mealType: String,
                 protein: [String],
                 foods: [],
                 carbohydrate: [String],

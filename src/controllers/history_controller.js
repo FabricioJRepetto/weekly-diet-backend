@@ -256,6 +256,8 @@ const editMeal = async (req, res, next) => {
         if (!meal) return res.json({ error: 'meal not recibed' })
         if (!meal_id) return res.json({ error: 'meal_id not recibed' })
 
+        console.log(meal);
+
         const newMeal = await History.findOneAndUpdate(
             {
                 user: id,
