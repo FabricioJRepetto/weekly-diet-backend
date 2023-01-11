@@ -447,28 +447,11 @@ const getAllWeeks = async (req, res, next) => {
                     start = weeksDates[i].split('-')[0],
                     end = weeksDates[i].split('-')[1]
 
-                /*
-                let aux = {
-                    vegetalC: 0,
-                    today: false,
-                    monday: false,
-                    tuesday: false,
-                    wednesday: false,
-                    thursday: false,
-                    friday: false,
-                    saturday: false,
-                    sunday: false
-                }
-                */
-                //! agrupar dias
-
+                //? agrupo días
                 let analisis = weekAnalist(aux, end, start, true)
                 let weekDays = Object.entries(analisis).filter(e => e[0] !== 'vegetalC' && e[0] !== 'today').map(e => e[1])
 
-                // console.log(weekDays);
                 let aux1 = {
-                    // vegetalC: analisis.vegetalC,
-                    // today: analisis.today,
                     ...analisis,
                     dates: {
                         start,
@@ -479,8 +462,7 @@ const getAllWeeks = async (req, res, next) => {
 
                 //? y busco si hay algun control entre las fechas de esta semana
                 const checkpointFound = checkpoints.find(c => new Date(c.date) >= new Date(start) && new Date(c.date) <= new Date(end))
-                if (checkpointFound) analisis.checkpoint = checkpointFound
-                else analisis.checkpoint = checkpointFound
+                aux1.checkpoint = checkpointFound
 
                 //? guardo los resultados en "response"
                 response.push(aux1)
