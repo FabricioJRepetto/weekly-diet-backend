@@ -333,8 +333,11 @@ const addFood = async (req, res, next) => {
 
         const history = await History.findOne({ user: id })
 
+        let vegC = food.ingredients.find(e => e.vegC),
+            aux = { ...food, vegC: !!vegC }
+
         if (history) {
-            history.customFoods.push(food)
+            history.customFoods.push(aux)
             await history.save()
 
             return res.json({ foods: history.customFoods, allFoods: [...group.foods, ...history.customFoods] })
@@ -343,12 +346,12 @@ const addFood = async (req, res, next) => {
                 {
                     user: id,
                     meals: [],
-                    customFoods: [food],
+                    customFoods: [aux],
                     checkpoints: []
                 }
             )
 
-            return res.json({ foods: [food], allFoods: [...group.foods, food] })
+            return res.json({ foods: [aux], allFoods: [...group.foods, aux] })
         }
     } catch (err) {
         next(err)
@@ -364,6 +367,9 @@ const editFood = async (req, res, next) => {
         if (!food) return res.json({ error: 'data (food) not recibed' })
         if (!food_id) return res.json({ error: 'data (food_id) not recibed' })
 
+        let vegC = food.ingredients.find(e => e.vegC),
+            aux = { ...food, vegC: !!vegC }
+
         const newFood = await History.findOneAndUpdate(
             {
                 user: id,
@@ -371,7 +377,7 @@ const editFood = async (req, res, next) => {
             },
             {
                 $set: {
-                    'customFoods.$': food
+                    'customFoods.$': aux
                 }
             },
             { new: true }
