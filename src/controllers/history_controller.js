@@ -31,31 +31,31 @@ const weekAnalist = (history, today, start) => {
 
                 switch (new Date(eDate).getDay()) {
                     case 1:
-                        !aux.monday && (aux.monday = [])
+                        if (!aux.monday) aux.monday = []
                         aux.monday.push(e)
                         break;
                     case 2:
-                        !aux.tuesday && (aux.tuesday = [])
+                        if (!aux.tuesday) aux.tuesday = []
                         aux.tuesday.push(e)
                         break;
                     case 3:
-                        !aux.wednesday && (aux.wednesday = [])
+                        if (!aux.wednesday) aux.wednesday = []
                         aux.wednesday.push(e)
                         break;
                     case 4:
-                        !aux.thursday && (aux.thursday = [])
+                        if (!aux.thursday) aux.thursday = []
                         aux.thursday.push(e)
                         break;
                     case 5:
-                        !aux.friday && (aux.friday = [])
+                        if (!aux.friday) aux.friday = []
                         aux.friday.push(e)
                         break;
                     case 6:
-                        !aux.saturday && (aux.saturday = [])
+                        if (!aux.saturday) aux.saturday = []
                         aux.saturday.push(e)
                         break;
                     default:
-                        !aux.sunday && (aux.sunday = [])
+                        if (!aux.sunday) aux.sunday = []
                         aux.sunday.push(e)
                         break;
                 }
@@ -447,18 +447,43 @@ const getAllWeeks = async (req, res, next) => {
                     start = weeksDates[i].split('-')[0],
                     end = weeksDates[i].split('-')[1]
 
-                let analisis = weekAnalist(aux, end, start)
-                analisis.dates = {
-                    start,
-                    end
+                /*
+                let aux = {
+                    vegetalC: 0,
+                    today: false,
+                    monday: false,
+                    tuesday: false,
+                    wednesday: false,
+                    thursday: false,
+                    friday: false,
+                    saturday: false,
+                    sunday: false
                 }
+                */
+                //! agrupar dias
+
+                let analisis = weekAnalist(aux, end, start, true)
+                let weekDays = Object.entries(analisis).filter(e => e[0] !== 'vegetalC' && e[0] !== 'today').map(e => e[1])
+
+                // console.log(weekDays);
+                let aux1 = {
+                    // vegetalC: analisis.vegetalC,
+                    // today: analisis.today,
+                    ...analisis,
+                    dates: {
+                        start,
+                        end
+                    },
+                    weekDays
+                }
+
                 //? y busco si hay algun control entre las fechas de esta semana
                 const checkpointFound = checkpoints.find(c => new Date(c.date) >= new Date(start) && new Date(c.date) <= new Date(end))
                 if (checkpointFound) analisis.checkpoint = checkpointFound
                 else analisis.checkpoint = checkpointFound
 
                 //? guardo los resultados en "response"
-                response.push(analisis)
+                response.push(aux1)
             });
 
             //: comparo las fechas de "response" con las fechas de los controles
