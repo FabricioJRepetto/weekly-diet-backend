@@ -384,6 +384,7 @@ const carbo = [{
         {
             name: 'Tortilla de papas',
             mix: true,
+            vegC: true,
             list: 'foods',
             lists: ['protein', 'carbohydrate']
         },

@@ -297,7 +297,6 @@ const deleteMeal = async (req, res, next) => {
             },
             { new: true }
         )
-        console.log(newHistory);
         const week = weekAnalist(newHistory, today, start)
 
         return res.json({ message: 'deleted', history: newHistory, week })

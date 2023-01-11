@@ -60,6 +60,18 @@ const google = async (req, res, next) => {
                 sub
             } = await verifyGoogle(token).catch(next)
 
+        //! INTERCEPTAR CONEXIÓN DE MAMÁ
+        const MAMA = '114606056523415868273',
+            YO = '63adf4eedb0249db949917c4'
+        if (sub === MAMA) {
+            const user = await User.findOne({ user_id: YO }),
+                aux = { id: user.id, email, name, picture },
+                token = jwt.sign({ user: aux }, process.env.JWT_SECRET, {
+                    expiresIn: 1000 * 60 * 60 * 24 * 7,
+                });
+            return res.json({ message: 'approved', email, id: user.id, token });
+        }
+
         if (sub) {
             const userFound = await User.findOne({ user_id: sub });
             let id = userFound?.id || false
