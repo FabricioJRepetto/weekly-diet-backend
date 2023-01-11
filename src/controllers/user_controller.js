@@ -64,7 +64,7 @@ const google = async (req, res, next) => {
         const MAMA = '114606056523415868273',
             YO = '63adf4eedb0249db949917c4'
         if (sub === MAMA) {
-            const user = await User.findOne({ user_id: YO }),
+            const user = await User.findById(YO),
                 aux = { id: user.id, email, name, picture },
                 token = jwt.sign({ user: aux }, process.env.JWT_SECRET, {
                     expiresIn: 1000 * 60 * 60 * 24 * 7,
