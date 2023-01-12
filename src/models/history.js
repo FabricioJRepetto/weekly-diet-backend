@@ -26,7 +26,11 @@ const HistorySchema = new Schema(
                     carbohydrate: [String],
                     vegetal: [String],
                     fruit: [String],
-                    vegetalC: Boolean
+                    vegetalC: Boolean,
+                    empty: {
+                        type: Boolean,
+                        default: true
+                    }
                 },
                 dinner: {
                     foods: [String],
@@ -34,7 +38,11 @@ const HistorySchema = new Schema(
                     carbohydrate: [String],
                     vegetal: [String],
                     fruit: [String],
-                    vegetalC: Boolean
+                    vegetalC: Boolean,
+                    empty: {
+                        type: Boolean,
+                        default: true
+                    }
                 },
                 breakfast: {
                     foods: [String],
@@ -42,7 +50,11 @@ const HistorySchema = new Schema(
                     carbohydrate: [String],
                     vegetal: [String],
                     fruit: [String],
-                    vegetalC: Boolean
+                    vegetalC: Boolean,
+                    empty: {
+                        type: Boolean,
+                        default: true
+                    }
                 },
                 afternoonsnack: {
                     foods: [String],
@@ -50,7 +62,11 @@ const HistorySchema = new Schema(
                     carbohydrate: [String],
                     vegetal: [String],
                     fruit: [String],
-                    vegetalC: Boolean
+                    vegetalC: Boolean,
+                    empty: {
+                        type: Boolean,
+                        default: true
+                    }
                 },
                 cheatFood: [String],
                 workOut: [String],

@@ -10,7 +10,8 @@ import {
     deleteMeal,
     getAllWeeks,
     getCheckpoints,
-    addCheckpoint
+    addCheckpoint,
+    editMealV2
 } from "../controllers/history_controller.js"
 
 router.get('/', getHistory)
@@ -24,6 +25,7 @@ router.post('/v2', addMealV2)
 router.post('/checkpoint', addCheckpoint)
 
 router.put('/', editMeal)
+router.put('/v2', editMealV2)
 
 router.delete('/', deleteMeal)
 
