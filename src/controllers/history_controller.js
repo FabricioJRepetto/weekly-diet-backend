@@ -215,14 +215,15 @@ const getFullHistory = async (req, res, next) => {
 
 const addMeal = async (req, res, next) => {
     try {
-        const { id } = req?.user
+        const { id } = req?.user,
+            { meal } = req?.body
         if (!id) return res.json({ error: 'user id no encontrada' })
-        if (!req.body?.meal) return res.json({ error: 'body.meal no encontrada' })
+        if (!meal) return res.json({ error: 'body.meal no encontrada' })
 
         const history = await History.findOne({ user: id })
 
         if (history) {
-            history.meals.push(req.body.meal)
+            history.meals.push(meal)
             await history.save()
 
             let week = weekAnalist(history, req.query.today, req.query.start)
@@ -232,7 +233,7 @@ const addMeal = async (req, res, next) => {
             const newHistory = await History.create(
                 {
                     user: id,
-                    meals: [req.body.meal],
+                    meals: [meal],
                     customFoods: [],
                     checkpoints: []
                 }

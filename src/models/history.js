@@ -15,8 +15,7 @@ const HistorySchema = new Schema(
                 carbohydrate: [String],
                 vegetal: [String],
                 vegetalC: Boolean,
-                date: String,
-                v2: true
+                date: String
             }
         ],
         checkpoints: [
