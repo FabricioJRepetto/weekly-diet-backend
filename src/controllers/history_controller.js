@@ -248,6 +248,82 @@ const addMeal = async (req, res, next) => {
     }
 }
 
+const addMealV2 = async (req, res, next) => {
+    //!!!!!! V2
+    try {
+        const { id } = req?.user,
+            { meal } = req?.body
+
+        if (!id) return res.json({ error: 'user id no encontrada' })
+        if (!meal) return res.json({ error: 'body.meal no encontrada' })
+        if (!meal.mealType) return res.json({ error: 'V2 no compatible, mealType no encontrada' })
+
+        /*
+        {
+            ! mealType: 'dinner',
+            ! date: '1/10/2023',
+
+            protein: [ '(Tortilla de papas)', 'Pollo a la plancha' ],
+            foods: [ 'Tortilla de papas' ],
+            carbohydrate: [ '(Tortilla de papas)' ],
+            vegetal: [ 'Ensalada', 'Brócoli' ],
+            vegetalC: true,
+            }
+        */
+
+        const history = await History.findOne({ user: id })
+
+        if (history) {
+            const day = await History.findOne({ user: id, 'days.date': meal.date })
+            if (day) {
+                day[mealType] = meal
+                await history.save()
+
+                //? modificar
+                let week = weekAnalist(history, req.query.today, req.query.start)
+
+                return res.json({ history, week })
+            } else {
+                history.days.push(
+                    {
+                        [meal.mealType]: meal,
+                        date: meal.date
+                    }
+                )
+                await history.save()
+
+                //? modificar
+                let week = weekAnalist(history, req.query.today, req.query.start)
+
+                return res.json({ history: history.meals, week })
+            }
+        } else {
+            const newHistory = await History.create(
+                {
+                    user: id,
+                    meals: [],
+                    days: [
+                        {
+                            [meal.mealType]: meal,
+                            date: meal.date
+                        }
+                    ],
+                    customFoods: [],
+                    checkpoints: []
+                }
+            )
+
+            //? modificar
+            let week = weekAnalist(history, req.query.today, req.query.start)
+
+            return res.json({ history: newHistory.meals, week })
+        }
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 const editMeal = async (req, res, next) => {
     try {
         const { id } = req?.user,
@@ -556,6 +632,7 @@ export {
     getWeek,
     getFullHistory,
     addMeal,
+    addMealV2,
     editMeal,
     deleteMeal,
     getFoods,

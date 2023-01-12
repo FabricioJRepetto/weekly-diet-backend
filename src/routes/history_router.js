@@ -5,6 +5,7 @@ import {
     getWeek,
     getFullHistory,
     addMeal,
+    addMealV2,
     editMeal,
     deleteMeal,
     getAllWeeks,
@@ -19,6 +20,7 @@ router.get('/allweeks', getAllWeeks)
 router.get('/checkpoint', getCheckpoints)
 
 router.post('/', addMeal)
+router.post('/v2', addMealV2)
 router.post('/checkpoint', addCheckpoint)
 
 router.put('/', editMeal)
