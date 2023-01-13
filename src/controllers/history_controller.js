@@ -114,6 +114,144 @@ const weekAnalist = (history, today, start) => {
     return aux
 }
 
+//!!!!!! V2
+const weekAnalistV2 = (history, today, start) => {
+    let aux = {
+        vegetalC: 0,
+        today: false,
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+        saturday: false,
+        sunday: false
+    }
+
+    if (history && history.days && history.days.length > 0) {
+        const balancer = (e) => {
+            let balanced = true,
+                message = []
+
+            if (e.lunch && e.dinner) {
+                let p1 = {
+                    p: !!e.lunch.protein.length,
+                    c: !!e.lunch.carbohydrate.length,
+                    v: !!e.lunch.vegetal.length
+                },
+                    p2 = {
+                        p: !!e.dinner.protein.length,
+                        c: !!e.dinner.carbohydrate.length,
+                        v: !!e.dinner.vegetal.length
+                    }
+
+
+                if (!p1.v || !p2.v) { //? si falta vegetal en alguna de las comidas
+                    balanced = false
+                    message.push('Faltan vegetales')
+                }
+                if (!p1.p && !p2.p) { //? si falta proteina en ambas comidas
+                    balanced = false
+                    message.push('Faltan proteinas')
+                }
+                if (!p1.c && !p2.c) { //? si falta carbos en ambas comidas
+                    balanced = false
+                    message.push('Faltan carbohidratos')
+                }
+
+                if ((p1.p && !p2.p) || (!p1.p && p2.p)) { //? si falta proteina en uno de los platos
+                    if (p1.c && p2.c) { //? y ambos platos tienen carbos
+                        balanced = false
+                        message.push('Faltan proteínas')
+                    }
+                }
+                if ((p1.c && !p2.c) || (!p1.c && p2.c)) { //? si faltan carbos en uno de los platos
+                    if (p1.p && p2.p) { //? y ambos platos tienen proteína
+                        balanced = false
+                        message.push('Faltan carbohidratos')
+                    }
+                }
+
+                return {
+                    balanced,
+                    message
+                }
+
+            }
+        }
+
+        const vegCounter = (e) => {
+            if (!e.vegetalC) return 0
+
+            let aux = 0
+
+            e.lunch.vegetalC && (aux += 1)
+            e.dinner.vegetalC && (aux += 1)
+            e.breakfast.vegetalC && (aux += 1)
+            e.afternoonsnack.vegetalC && (aux += 1)
+            console.log(aux);
+            return aux
+        }
+
+        //? Separa en días
+        history.days.forEach(e => {
+            const eDate = new Date(e.date),
+                Start = new Date(start),
+                Today = new Date(today)
+
+
+            if (eDate >= Start && eDate <= Today) {
+
+                if (eDate.getTime() === Today.getTime()) {
+                    if (!aux.today) {
+                        let mealsRegistered = []
+
+                        for (const key in e) {
+                            if (Object.hasOwnProperty.call(e, key)) {
+                                const meal = e[key]
+                                if (meal.empty && !meal.empty) mealsRegistered.push(key)
+                            }
+                        }
+
+                        aux.today = {
+                            dayData: e,
+                            mealsRegistered
+                        }
+                    }
+                }
+
+                aux.vegetalC = aux.vegetalC + vegCounter(e)
+
+                switch (new Date(eDate).getDay()) {
+                    case 1:
+                        if (!aux.monday) aux.monday = { dayData: e, ...balancer(e) }
+                        break;
+                    case 2:
+                        if (!aux.tuesday) aux.tuesday = { dayData: e, ...balancer(e) }
+                        break;
+                    case 3:
+                        if (!aux.wednesday) aux.wednesday = { dayData: e, ...balancer(e) }
+                        break;
+                    case 4:
+                        if (!aux.thursday) aux.thursday = { dayData: e, ...balancer(e) }
+                        break;
+                    case 5:
+                        if (!aux.friday) aux.friday = { dayData: e, ...balancer(e) }
+                        break;
+                    case 6:
+                        if (!aux.saturday) aux.saturday = { dayData: e, ...balancer(e) }
+                        break;
+                    default:
+                        if (!aux.sunday) aux.sunday = { dayData: e, ...balancer(e) }
+                        break;
+                }
+            }
+        })
+    }
+
+    return aux
+}
+
 const defineWeek = (d) => {
     if (!d) return {
         today: 'error: no date',
@@ -156,6 +294,7 @@ const getHistory = async (req, res, next) => {
                 {
                     user: id,
                     meals: [],
+                    days: [],
                     customFoods: [],
                     checkpoints: []
                 }
@@ -201,6 +340,37 @@ const getFullHistory = async (req, res, next) => {
                 {
                     user: id,
                     meals: [],
+                    days: [],
+                    customFoods: [],
+                    checkpoints: []
+                }
+            )
+            return res.json({ history: [], week, group: g })
+        }
+
+    } catch (err) {
+        next(err)
+    }
+}
+//!!!!!! V2
+const getFullHistoryV2 = async (req, res, next) => {
+    try {
+        const { id } = req?.user
+        if (!id) return res.json({ error: 'user id no encontrada' })
+
+        const history = await History.findOne({ user: id })
+
+        let week = weekAnalistV2(history, req.query.today, req.query.start)
+        let foods = history?.customFoods || []
+        let g = { ...group, foods: [...group.foods, ...foods] }
+
+        if (history) return res.json({ history: history.days, week, group: g })
+        else {
+            await History.create(
+                {
+                    user: id,
+                    meals: [],
+                    days: [],
                     customFoods: [],
                     checkpoints: []
                 }
@@ -234,6 +404,7 @@ const addMeal = async (req, res, next) => {
                 {
                     user: id,
                     meals: [meal],
+                    days: [],
                     customFoods: [],
                     checkpoints: []
                 }
@@ -415,6 +586,44 @@ const deleteMeal = async (req, res, next) => {
     }
 }
 
+//!!!!!! V2
+const deleteMealV2 = async (req, res, next) => {
+    try {
+        const { id } = req?.user,
+            { day_id, mealType, today, start } = req?.query
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!day_id) return res.json({ error: 'day_id not recibed' })
+        if (!mealType) return res.json({ error: 'V2 no compatible, mealType not recibed' })
+
+        const history = await History.findOne({ user: id })
+
+        if (history) {
+            let day = history.days.find(e => e.id === day_id)
+            if (day) {
+                let aux = [...history.days]
+                aux = aux.map(day => {
+                    if (day.id === day_id) {
+                        return { ...day, [mealType]: { empty: true } }
+                    } else return day
+                })
+                history.days = aux
+                await history.save()
+
+                //? modificar
+                // let week = weekAnalist(history, today, start)
+
+                return res.json({ history: history.days })
+            } else {
+                return res.json({ error: true, message: 'Something happend (no day)' })
+            }
+        } else return res.json({ error: true, message: 'Something happend (no history)' })
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 const getFoods = async (req, res, next) => {
     try {
         const { id } = req?.user
@@ -454,6 +663,7 @@ const addFood = async (req, res, next) => {
                 {
                     user: id,
                     meals: [],
+                    days: [],
                     customFoods: [aux],
                     checkpoints: []
                 }
@@ -545,7 +755,7 @@ const getAllWeeks = async (req, res, next) => {
                 response = []
 
             meals.forEach(e => {
-                //? defino semana a la que pertenece la comida
+                //? defino la semana a la que pertenece la comida
                 const { start, end } = defineWeek(e.date),
                     key = `${start}-${end}`
                 //? reviso si existe semana en "weeks" o la creo
@@ -609,6 +819,7 @@ const getCheckpoints = async (req, res, next) => {
                 {
                     user: id,
                     meals: [],
+                    days: [],
                     customFoods: [],
                     checkpoints: []
                 }
@@ -644,6 +855,7 @@ const addCheckpoint = async (req, res, next) => {
                 {
                     user: id,
                     meals: [],
+                    days: [],
                     customFoods: [],
                     checkpoints: [checkpoint]
                 }
@@ -657,20 +869,100 @@ const addCheckpoint = async (req, res, next) => {
     }
 }
 
+const migrateData = async (req, res, next) => {
+    try {
+        const { id } = req?.user
+
+        const data = await History.findOne({ user: id }),
+            old = data.meals
+
+        let oldDays = {}
+        //? iterar vieja data
+        //? guardar comidas con la misma fecha en el mismo obj
+        /*            
+            {
+                fecha: [almuerzo, cena]
+            }
+        */
+        for (let i = 0; i < old.length; i++) {
+            const oldMeal = old[i];
+            if (oldDays[oldMeal.date]) {
+                oldDays[oldMeal.date].push(oldMeal)
+            } else {
+                oldDays[oldMeal.date] = [oldMeal]
+            }
+        }
+
+        res.json({ oldDays })
+
+    } catch (err) {
+        next(err)
+    }
+}
+const migrateData2 = async (req, res, next) => {
+    try {
+        const { old } = req.body
+
+        if (!old) return res.json({ error: 'no data' })
+
+        let newDays = []
+
+        //? itero el nuevo array
+        //? le doy formato a la info
+        // almuerzo = data[0], cena = data[1]
+        // si hay almuerzo agrego, si hay cena agrego
+        //? guardo en array
+
+        for (let i = 0; i < Object.values(old).length; i++) {
+            const data = Object.values(old)[i],
+                date = Object.keys(old)[i]
+            // console.log(date, data);
+            let newData = { date }
+
+            data[0] && (newData.lunch = { ...data[0], empty: false })
+            data[1] && (newData.dinner = { ...data[1], empty: false })
+
+            newDays.push(newData)
+        }
+
+        //: guardar cada dia de newDays en la db
+
+        const history = await History.findOne({ user: req.user.id })
+
+        history.days = newDays
+        await history.save()
+
+        // for (let i = 0; i < newDays.length; i++) {
+        //     const day = newDays[i];
+
+        // }
+
+        return res.json({ newData: newDays, days: history.days })
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 export {
     getHistory,
     getWeek,
     getFullHistory,
+    getFullHistoryV2,
     addMeal,
     addMealV2,
     editMeal,
     editMealV2,
     deleteMeal,
+    deleteMealV2,
     getFoods,
     addFood,
     editFood,
     deleteFood,
     getAllWeeks,
     getCheckpoints,
-    addCheckpoint
+    addCheckpoint,
+
+    migrateData,
+    migrateData2
 }
