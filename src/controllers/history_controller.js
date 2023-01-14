@@ -114,18 +114,36 @@ const weekAnalist = (history, today, start) => {
     return aux
 }
 
-//!!!!!! V2
-const weekAnalistV2 = (history, today, start) => {
+const dayEmptyCheck = (day) => {
+    if (
+        day.breakfast.empty &&
+        day.lunch.empty &&
+        day.afternoonsnack.empty &&
+        day.dinner.empty &&
+        !!day.workOut.length &&
+        !!day.cheatFood.length
+    ) {
+        return true
+    } else return false
+}
+
+//!!!!!!? V2
+const weekAnalistV2 = (history, today, start, createWeekDays) => {
     let aux = {
         vegetalC: 0,
+        cheatFoods: 0,
+        workOuts: 0,
         today: false,
-        monday: false,
-        tuesday: false,
-        wednesday: false,
-        thursday: false,
-        friday: false,
-        saturday: false,
-        sunday: false
+        weekDays: {
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+        },
+        days: []
     }
 
     if (history && history.days && history.days.length > 0) {
@@ -180,21 +198,26 @@ const weekAnalistV2 = (history, today, start) => {
             }
         }
 
-        const vegCounter = (e) => {
-            if (!e.vegetalC) return 0
+        const extrasCounter = (e) => {
+            let vC = 0
 
-            let aux = 0
+            e.lunch.vegetalC && (vC += 1)
+            e.dinner.vegetalC && (vC += 1)
+            e.breakfast.vegetalC && (vC += 1)
+            e.afternoonsnack.vegetalC && (vC += 1)
 
-            e.lunch.vegetalC && (aux += 1)
-            e.dinner.vegetalC && (aux += 1)
-            e.breakfast.vegetalC && (aux += 1)
-            e.afternoonsnack.vegetalC && (aux += 1)
-            console.log(aux);
-            return aux
+            return {
+                vC,
+                cF: e.cheatFood.length,
+                wO: !!e.workOut.length ? 1 : 0
+            }
         }
 
+        let newHistory = JSON.stringify(history)
+        newHistory = JSON.parse(newHistory)
+
         //? Separa en días
-        history.days.forEach(e => {
+        newHistory.days.forEach(e => {
             const eDate = new Date(e.date),
                 Start = new Date(start),
                 Today = new Date(today)
@@ -203,47 +226,66 @@ const weekAnalistV2 = (history, today, start) => {
             if (eDate >= Start && eDate <= Today) {
 
                 if (eDate.getTime() === Today.getTime()) {
-                    if (!aux.today) {
-                        let mealsRegistered = []
+                    // if (!aux.today) {
+                    let mealsRegistered = []
 
-                        for (const key in e) {
-                            if (Object.hasOwnProperty.call(e, key)) {
-                                const meal = e[key]
-                                if (meal.empty && !meal.empty) mealsRegistered.push(key)
+                    for (const key in e) {
+                        if (Object.hasOwnProperty.call(e, key)) {
+                            const meal = e[key];
+
+                            if (typeof e === 'object' && !Array.isArray(e)) {
+                                if (meal.hasOwnProperty('empty') && !meal.empty) {
+                                    mealsRegistered.push(key)
+                                }
                             }
-                        }
 
-                        aux.today = {
-                            dayData: e,
-                            mealsRegistered
                         }
                     }
+
+                    aux.today = {
+                        ...e,
+                        mealsRegistered
+                    }
+                    // }
                 }
 
-                aux.vegetalC = aux.vegetalC + vegCounter(e)
+                const {
+                    vC, // vegetal C
+                    cF, // cheat food
+                    wO // workout
+                } = extrasCounter(e)
 
-                switch (new Date(eDate).getDay()) {
-                    case 1:
-                        if (!aux.monday) aux.monday = { dayData: e, ...balancer(e) }
-                        break;
-                    case 2:
-                        if (!aux.tuesday) aux.tuesday = { dayData: e, ...balancer(e) }
-                        break;
-                    case 3:
-                        if (!aux.wednesday) aux.wednesday = { dayData: e, ...balancer(e) }
-                        break;
-                    case 4:
-                        if (!aux.thursday) aux.thursday = { dayData: e, ...balancer(e) }
-                        break;
-                    case 5:
-                        if (!aux.friday) aux.friday = { dayData: e, ...balancer(e) }
-                        break;
-                    case 6:
-                        if (!aux.saturday) aux.saturday = { dayData: e, ...balancer(e) }
-                        break;
-                    default:
-                        if (!aux.sunday) aux.sunday = { dayData: e, ...balancer(e) }
-                        break;
+                aux.vegetalC = aux.vegetalC + vC
+                aux.cheatFoods = aux.cheatFoods + cF
+                aux.workOuts = aux.workOuts + wO
+
+                let tempDay = { ...e, ...balancer(e) }
+                aux.days.push(tempDay)
+
+                if (createWeekDays) {
+                    switch (new Date(eDate).getDay()) {
+                        case 1:
+                            aux.weekDays.monday = tempDay
+                            break;
+                        case 2:
+                            aux.weekDays.tuesday = tempDay
+                            break;
+                        case 3:
+                            aux.weekDays.wednesday = tempDay
+                            break;
+                        case 4:
+                            aux.weekDays.thursday = tempDay
+                            break;
+                        case 5:
+                            aux.weekDays.friday = tempDay
+                            break;
+                        case 6:
+                            aux.weekDays.saturday = tempDay
+                            break;
+                        default:
+                            aux.weekDays.sunday = tempDay
+                            break;
+                    }
                 }
             }
         })
@@ -352,7 +394,7 @@ const getFullHistory = async (req, res, next) => {
         next(err)
     }
 }
-//!!!!!! V2
+//!!!!!!? V2
 const getFullHistoryV2 = async (req, res, next) => {
     try {
         const { id } = req?.user
@@ -419,7 +461,7 @@ const addMeal = async (req, res, next) => {
     }
 }
 
-//!!!!!! V2
+//!!!!!!? V2
 const addMealV2 = async (req, res, next) => {
     try {
         const { id } = req?.user,
@@ -443,8 +485,7 @@ const addMealV2 = async (req, res, next) => {
                 history.days = aux
                 await history.save()
 
-                //? modificar
-                let week = weekAnalist(history, req.query.today, req.query.start)
+                let week = weekAnalistV2(history, req.query.today, req.query.start)
 
                 return res.json({ history: history.days, week })
             } else {
@@ -456,8 +497,7 @@ const addMealV2 = async (req, res, next) => {
                 )
                 await history.save()
 
-                //? modificar
-                let week = weekAnalist(history, req.query.today, req.query.start)
+                let week = weekAnalistV2(history, req.query.today, req.query.start)
 
                 return res.json({ history: history.days, week })
             }
@@ -478,7 +518,7 @@ const addMealV2 = async (req, res, next) => {
             )
 
             //? modificar
-            let week = weekAnalist(history, req.query.today, req.query.start)
+            let week = weekAnalistV2(history, req.query.today, req.query.start)
 
             return res.json({ history: newHistory.days, week })
         }
@@ -519,7 +559,7 @@ const editMeal = async (req, res, next) => {
     }
 }
 
-//!!!!!! V2
+//!!!!!!? V2
 const editMealV2 = async (req, res, next) => {
     try {
         const { id } = req?.user,
@@ -544,8 +584,7 @@ const editMealV2 = async (req, res, next) => {
                 history.days = aux
                 await history.save()
 
-                //? modificar
-                let week = weekAnalist(history, today, start)
+                let week = weekAnalistV2(history, today, start)
 
                 return res.json({ history: history.days, week })
             } else {
@@ -586,7 +625,7 @@ const deleteMeal = async (req, res, next) => {
     }
 }
 
-//!!!!!! V2
+//!!!!!!? V2
 const deleteMealV2 = async (req, res, next) => {
     try {
         const { id } = req?.user,
@@ -599,21 +638,23 @@ const deleteMealV2 = async (req, res, next) => {
         const history = await History.findOne({ user: id })
 
         if (history) {
-            let day = history.days.find(e => e.id === day_id)
+            let day = history.days.find(e => e._id.toString() === day_id)
+            console.log(day);
             if (day) {
                 let aux = [...history.days]
                 aux = aux.map(day => {
                     if (day.id === day_id) {
-                        return { ...day, [mealType]: { empty: true } }
+                        let empty = dayEmptyCheck(day)
+                        return { ...day, [mealType]: { empty: true }, empty }
                     } else return day
                 })
                 history.days = aux
+
                 await history.save()
 
-                //? modificar
-                // let week = weekAnalist(history, today, start)
+                let week = weekAnalistV2(history, today, start)
 
-                return res.json({ history: history.days })
+                return res.json({ history: history.days, week })
             } else {
                 return res.json({ error: true, message: 'Something happend (no day)' })
             }
@@ -804,6 +845,67 @@ const getAllWeeks = async (req, res, next) => {
     }
 }
 
+//!!!!!!? V2
+const getAllWeeksV2 = async (req, res, next) => {
+    try {
+        const { id } = req?.user
+
+        if (!id) return res.json({ error: 'user id not recibed' })
+
+        const history = await History.findOne({ user: id })
+
+        if (history && !!history.days.length) {
+            const days = history.days,
+                checkpoints = history.checkpoints
+            let weeks = {},
+                response = []
+
+            days.forEach(e => {
+                //? defino la semana a la que pertenece la comida
+                const { start, end } = defineWeek(e.date),
+                    key = `${start}-${end}`
+                //? reviso si existe semana en "weeks" o la creo
+                //? guardo todas las comidas en la semana correspondiente
+                weeks[key]
+                    ? weeks[key].push(e)
+                    : weeks[key] = [e]
+            })
+            //? ejecuto "weekAnalist" por cada semana en "weeks"
+            let weeksDates = Object.keys(weeks)
+            Object.values(weeks).forEach((w, i) => {
+                const aux = { days: w },
+                    start = weeksDates[i].split('-')[0],
+                    end = weeksDates[i].split('-')[1]
+
+                //? agrupo días                                                          
+                let analisis = weekAnalistV2(aux, end, start, true) //* true = crear miniDays                
+
+                let aux1 = {
+                    ...analisis,
+                    dates: {
+                        start,
+                        end
+                    }
+                }
+
+                //? y busco si hay algun control entre las fechas de esta semana
+                const checkpointFound = checkpoints.find(c => new Date(c.date) >= new Date(start) && new Date(c.date) <= new Date(end))
+                aux1.checkpoint = checkpointFound
+
+                //? guardo los resultados en "response"
+                response.push(aux1)
+            });
+
+            return res.json({ response })
+        }
+
+        return res.json({ error: true, message: 'no history found' })
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 const getCheckpoints = async (req, res, next) => {
     try {
         const { id } = req.user
@@ -960,6 +1062,7 @@ export {
     editFood,
     deleteFood,
     getAllWeeks,
+    getAllWeeksV2,
     getCheckpoints,
     addCheckpoint,
 

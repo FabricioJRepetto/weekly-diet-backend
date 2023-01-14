@@ -70,7 +70,10 @@ const HistorySchema = new Schema(
                 },
                 cheatFood: [String],
                 workOut: [String],
-
+                empty: {
+                    type: Boolean,
+                    default: false
+                },
                 date: String
             }
         ],
