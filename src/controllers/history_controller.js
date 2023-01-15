@@ -114,14 +114,16 @@ const weekAnalist = (history, today, start) => {
     return aux
 }
 
-const dayEmptyCheck = (day) => {
+const dayEmptyCheck = (day, target) => {
+    day[target].empty = true
+
     if (
         day.breakfast.empty &&
         day.lunch.empty &&
         day.afternoonsnack.empty &&
         day.dinner.empty &&
-        !!day.workOut.length &&
-        !!day.cheatFood.length
+        day.workOut.length < 1 &&
+        day.cheatFood.length < 1
     ) {
         return true
     } else return false
@@ -365,35 +367,6 @@ const getWeek = async (req, res, next) => {
     }
 }
 
-const getFullHistory = async (req, res, next) => {
-    try {
-        const { id } = req?.user
-        if (!id) return res.json({ error: 'user id no encontrada' })
-
-        const history = await History.findOne({ user: id })
-
-        let week = weekAnalist(history, req.query.today, req.query.start)
-        let foods = history?.customFoods || []
-        let g = { ...group, foods: [...group.foods, ...foods] }
-
-        if (history) return res.json({ history: history.meals, week, group: g })
-        else {
-            await History.create(
-                {
-                    user: id,
-                    meals: [],
-                    days: [],
-                    customFoods: [],
-                    checkpoints: []
-                }
-            )
-            return res.json({ history: [], week, group: g })
-        }
-
-    } catch (err) {
-        next(err)
-    }
-}
 //!!!!!!? V2
 const getFullHistoryV2 = async (req, res, next) => {
     try {
@@ -425,47 +398,11 @@ const getFullHistoryV2 = async (req, res, next) => {
     }
 }
 
-const addMeal = async (req, res, next) => {
-    try {
-        const { id } = req?.user,
-            { meal } = req?.body
-        if (!id) return res.json({ error: 'user id no encontrada' })
-        if (!meal) return res.json({ error: 'body.meal no encontrada' })
-
-        const history = await History.findOne({ user: id })
-
-        if (history) {
-            history.meals.push(meal)
-            await history.save()
-
-            let week = weekAnalist(history, req.query.today, req.query.start)
-
-            return res.json({ history, week })
-        } else {
-            const newHistory = await History.create(
-                {
-                    user: id,
-                    meals: [meal],
-                    days: [],
-                    customFoods: [],
-                    checkpoints: []
-                }
-            )
-
-            let week = weekAnalist(history, req.query.today, req.query.start)
-
-            return res.json({ history: newHistory.meals, week })
-        }
-    } catch (err) {
-        next(err)
-    }
-}
-
 //!!!!!!? V2
 const addMealV2 = async (req, res, next) => {
     try {
         const { id } = req?.user,
-            { meal } = req?.body
+            { meal, isExtra } = req?.body
 
         if (!id) return res.json({ error: 'user id no encontrada' })
         if (!meal) return res.json({ error: 'body.meal no encontrada' })
@@ -479,7 +416,8 @@ const addMealV2 = async (req, res, next) => {
                 let aux = [...history.days]
                 aux = aux.map(day => {
                     if (day.date === meal.date) {
-                        return { ...day, [meal.mealType]: { ...meal, empty: false } }
+                        if (isExtra) return { ...day, [meal.mealType]: meal.data, empty: false }
+                        else return { ...day, [meal.mealType]: { ...meal, empty: false }, empty: false }
                     } else return day
                 })
                 history.days = aux
@@ -502,13 +440,15 @@ const addMealV2 = async (req, res, next) => {
                 return res.json({ history: history.days, week })
             }
         } else {
+            let aux = isExtra ? meal.data : { ...meal, empty: false }
             const newHistory = await History.create(
                 {
                     user: id,
                     meals: [],
                     days: [
                         {
-                            [meal.mealType]: { ...meal, empty: false },
+                            [meal.mealType]: aux,
+                            empty: false,
                             date: meal.date
                         }
                     ],
@@ -523,37 +463,6 @@ const addMealV2 = async (req, res, next) => {
             return res.json({ history: newHistory.days, week })
         }
 
-    } catch (err) {
-        next(err)
-    }
-}
-
-const editMeal = async (req, res, next) => {
-    try {
-        const { id } = req?.user,
-            { meal, meal_id, today, start } = req?.body
-
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!meal) return res.json({ error: 'meal not recibed' })
-        if (!meal_id) return res.json({ error: 'meal_id not recibed' })
-
-        const newMeal = await History.findOneAndUpdate(
-            {
-                user: id,
-                'meals._id': meal_id
-            },
-            {
-                $set: {
-                    'meals.$': meal
-                }
-            },
-            { new: true }
-        )
-
-        if (newMeal) {
-            let week = weekAnalist(newMeal, today, start)
-            return res.json({ message: 'Meal updated', history: newMeal, week })
-        } else return res.json({ error: true, message: 'Something happend' })
     } catch (err) {
         next(err)
     }
@@ -597,34 +506,6 @@ const editMealV2 = async (req, res, next) => {
     }
 }
 
-const deleteMeal = async (req, res, next) => {
-    try {
-        const { id } = req?.user,
-            { meal_id, today, start } = req?.query
-
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!meal_id) return res.json({ error: 'meal_id not recibed' })
-
-        const newHistory = await History.findOneAndUpdate(
-            {
-                user: id
-            },
-            {
-                $pull: {
-                    meals: { _id: meal_id }
-                }
-            },
-            { new: true }
-        )
-        const week = weekAnalist(newHistory, today, start)
-
-        return res.json({ message: 'deleted', history: newHistory, week })
-
-    } catch (err) {
-        next(err)
-    }
-}
-
 //!!!!!!? V2
 const deleteMealV2 = async (req, res, next) => {
     try {
@@ -639,12 +520,12 @@ const deleteMealV2 = async (req, res, next) => {
 
         if (history) {
             let day = history.days.find(e => e._id.toString() === day_id)
-            console.log(day);
+            // console.log(day);
             if (day) {
                 let aux = [...history.days]
                 aux = aux.map(day => {
                     if (day.id === day_id) {
-                        let empty = dayEmptyCheck(day)
+                        let empty = dayEmptyCheck(day, mealType)
                         return { ...day, [mealType]: { empty: true }, empty }
                     } else return day
                 })
@@ -781,70 +662,6 @@ const deleteFood = async (req, res, next) => {
     }
 }
 
-const getAllWeeks = async (req, res, next) => {
-    try {
-        const { id } = req?.user
-
-        if (!id) return res.json({ error: 'user id not recibed' })
-
-        const history = await History.findOne({ user: id })
-
-        if (history && !!history.meals.length) {
-            const meals = history.meals,
-                checkpoints = history.checkpoints
-            let weeks = {},
-                response = []
-
-            meals.forEach(e => {
-                //? defino la semana a la que pertenece la comida
-                const { start, end } = defineWeek(e.date),
-                    key = `${start}-${end}`
-                //? reviso si existe semana en "weeks" o la creo
-                //? guardo todas las comidas en la semana correspondiente
-                weeks[key]
-                    ? weeks[key].push(e)
-                    : weeks[key] = [e]
-            })
-            //? ejecuto "weekAnalist" por cada semana en "weeks"
-            let weeksDates = Object.keys(weeks)
-            Object.values(weeks).forEach((w, i) => {
-                const aux = { meals: w },
-                    start = weeksDates[i].split('-')[0],
-                    end = weeksDates[i].split('-')[1]
-
-                //? agrupo días
-                let analisis = weekAnalist(aux, end, start, true)
-                let weekDays = Object.entries(analisis).filter(e => e[0] !== 'vegetalC' && e[0] !== 'today').map(e => e[1])
-
-                let aux1 = {
-                    ...analisis,
-                    dates: {
-                        start,
-                        end
-                    },
-                    weekDays
-                }
-
-                //? y busco si hay algun control entre las fechas de esta semana
-                const checkpointFound = checkpoints.find(c => new Date(c.date) >= new Date(start) && new Date(c.date) <= new Date(end))
-                aux1.checkpoint = checkpointFound
-
-                //? guardo los resultados en "response"
-                response.push(aux1)
-            });
-
-            //: comparo las fechas de "response" con las fechas de los controles
-            //: agrego el control a las semanas correspondientes
-            return res.json({ weeks, response })
-        }
-
-        return res.json({ error: true, message: 'no history found' })
-
-    } catch (err) {
-        next(err)
-    }
-}
-
 //!!!!!!? V2
 const getAllWeeksV2 = async (req, res, next) => {
     try {
@@ -896,10 +713,11 @@ const getAllWeeksV2 = async (req, res, next) => {
                 response.push(aux1)
             });
 
-            return res.json({ response })
-        }
+            return res.json(response)
+        } else {
 
-        return res.json({ error: true, message: 'no history found' })
+            return res.json({ error: true, message: 'no history found' })
+        }
 
     } catch (err) {
         next(err)
@@ -940,10 +758,10 @@ const addCheckpoint = async (req, res, next) => {
         const { id } = req.user,
             { checkpoint } = req.body
 
-        if (!id) return res.status(400).json({ error: 'user id not recibed' })
-        if (!checkpoint) return res.status(400).json({ error: 'data (checkpoint) not recibed' })
-        if (!checkpoint.weight) return res.status(400).json({ error: 'data (checkpoint.weight) not recibed' })
-        if (!checkpoint.date) return res.status(400).json({ error: 'data (checkpoint.date) not recibed' })
+        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!checkpoint) return res.json({ error: 'data (checkpoint) not recibed' })
+        if (!checkpoint.weight) return res.json({ error: 'data (checkpoint.weight) not recibed' })
+        if (!checkpoint.date) return res.json({ error: 'data (checkpoint.date) not recibed' })
 
         const history = await History.findOne({ user: id })
 
@@ -1049,19 +867,17 @@ const migrateData2 = async (req, res, next) => {
 export {
     getHistory,
     getWeek,
-    getFullHistory,
+
     getFullHistoryV2,
-    addMeal,
     addMealV2,
-    editMeal,
     editMealV2,
-    deleteMeal,
     deleteMealV2,
+
     getFoods,
     addFood,
     editFood,
     deleteFood,
-    getAllWeeks,
+
     getAllWeeksV2,
     getCheckpoints,
     addCheckpoint,

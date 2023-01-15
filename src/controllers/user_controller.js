@@ -97,7 +97,7 @@ const google = async (req, res, next) => {
             // enviarlo como cookie por headers
             // como accedo a la cookie desde el cliente?
         } else {
-            return res.status(403).json({
+            return res.json({
                 error: true,
                 message: "Sesión expirada, vuelve a iniciar sesión",
                 expiredToken: true,
@@ -122,17 +122,17 @@ const verifyJWT = async (token) => {
 const autoLogIn = async (req, res, next) => {
     try {
         const token = req.headers.authorization
-        if (!token) return res.status(403).json({ error: true, message: "No token recibed" })
+        if (!token) return res.json({ error: true, message: "No token recibed" })
 
         const { user, userFound } = await verifyJWT(token)
 
-        if (!userFound) return res.status(404).json({ error: true, message: "User not found" })
+        if (!userFound) return res.json({ error: true, message: "User not found" })
 
         return res.status(200).json({ message: 'Loged in succesfully', ...user })
 
     } catch (err) {
         if (err?.name === "TokenExpiredError")
-            return res.status(403).json({
+            return res.json({
                 error: true,
                 message: "Session expired, login again",
                 expiredToken: true,
@@ -144,11 +144,11 @@ const autoLogIn = async (req, res, next) => {
 const verifyToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization
-        if (!token) return res.status(403).json({ error: true, message: "No token recibed" })
+        if (!token) return res.json({ error: true, message: "No token recibed" })
 
         const { user, userFound } = await verifyJWT(token)
 
-        if (!userFound) return res.status(404).json({ error: true, message: "User not found" })
+        if (!userFound) return res.json({ error: true, message: "User not found" })
 
         req.user = user
 
@@ -156,12 +156,12 @@ const verifyToken = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         if (err?.name === "TokenExpiredError")
-            return res.status(403).json({
+            return res.json({
                 error: true,
                 message: "Session expired, login again",
                 expiredToken: true,
             });
-        return res.status(401).json({ message: "Sin autorización" });
+        return res.json({ message: "Sin autorización" });
     }
 }
 

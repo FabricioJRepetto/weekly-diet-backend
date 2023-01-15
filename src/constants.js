@@ -239,6 +239,12 @@ const carbo = [{
     },
     {
         list: 'vegetal',
+        color: '#496c19',
+        group: 'B',
+        name: 'Palta'
+    },
+    {
+        list: 'vegetal',
         color: '#5e223e',
         group: 'B',
         name: 'Remolacha'
@@ -398,6 +404,7 @@ const carbo = [{
             name: 'Hamburguesa',
             mix: true,
             list: 'foods',
+            cheatfood: true,
             lists: ['carbohydrate', 'protein']
         },
         {
@@ -413,7 +420,168 @@ const carbo = [{
             lists: ['vegetal', 'protein']
         },
     ],
-    everything = protein.concat(carbohydrate, vegetal)
+    breakfast = [{
+        color: '#331a06',
+        list: 'breakfast',
+        name: 'Café'
+    },
+    {
+        color: '#72431b',
+        list: 'breakfast',
+        name: 'Café con leche'
+    },
+    {
+        color: '#886243',
+        list: 'breakfast',
+        name: 'Pan integral'
+    },
+    {
+        color: '#f5bb51',
+        list: 'breakfast',
+        name: 'Tostada'
+    },
+    {
+        color: '#FFFFFF',
+        list: 'breakfast',
+        name: 'Queso untable'
+    },
+    {
+        color: '#c66b20',
+        list: 'breakfast',
+        name: 'Mermelada'
+    },
+    {
+        color: '#FFFFFF',
+        list: 'breakfast',
+        name: 'Leche'
+    },
+    {
+        color: '#FFFFFF',
+        list: 'breakfast',
+        name: 'Yogurt'
+    },
+    {
+        color: '#FFFFFF',
+        list: 'breakfast',
+        name: 'Yogurt con granola'
+    },
+    {
+        color: '#f5bb51',
+        list: 'breakfast',
+        name: 'Galletitas'
+    },
+    ],
+    fruit = [{
+        color: '#ffd84c',
+        list: 'fruit',
+        name: 'Banana'
+    },
+    {
+        color: '#ea2525',
+        list: 'fruit',
+        name: 'Manzana'
+    },
+    {
+        color: '#ea2525',
+        list: 'fruit',
+        name: 'Frutilla'
+    },
+    {
+        color: '#ff5c5c',
+        list: 'fruit',
+        name: 'Sandía'
+    },
+    {
+        color: '#ffd84c',
+        list: 'fruit',
+        name: 'Ananá'
+    },
+    {
+        color: '#ea2525',
+        list: 'fruit',
+        name: 'Cereza'
+    },
+    {
+        color: '#572b92',
+        list: 'fruit',
+        name: 'Ciruela'
+    },
+    {
+        color: '#ffa228',
+        list: 'fruit',
+        name: 'Durazno'
+    },
+    {
+        color: '#ffa228',
+        list: 'fruit',
+        name: 'Damasco'
+    },
+    {
+        color: '#a3c835',
+        list: 'fruit',
+        name: 'Kiwi'
+    },
+    {
+        color: '#f3de3e',
+        list: 'fruit',
+        name: 'Melón'
+    },
+    {
+        color: '#ffa228',
+        list: 'fruit',
+        name: 'Mango'
+    },
+    {
+        color: '#ff8000',
+        list: 'fruit',
+        name: 'Mandarina'
+    },
+    {
+        color: '#ff8000',
+        list: 'fruit',
+        name: 'Naranja'
+    },
+    {
+        color: '#fbff00',
+        list: 'fruit',
+        name: 'Pomelo'
+    },
+    {
+        color: '#e8fc4f',
+        list: 'fruit',
+        name: 'Pera'
+    },
+    {
+        color: '#572b92',
+        list: 'fruit',
+        name: 'Uva'
+    }
+    ],
+    workouts = [{
+        name: 'Gimnasio'
+    },
+    {
+        name: 'Basquet'
+    },
+    {
+        name: 'Bicicleta'
+    },
+    {
+        name: 'Cardio'
+    },
+    {
+        name: 'Correr'
+    },
+    {
+        name: 'Escalada'
+    },
+    {
+        name: 'Fútbol'
+    },
+    {
+        name: 'Natación'
+    }],
+    everything = protein.concat(carbohydrate, vegetal, breakfast, fruit)
 
 export const group = {
     protein,
@@ -428,5 +596,8 @@ export const group = {
     vegB,
     vegC,
     foods,
+    breakfast,
+    fruit,
+    workouts,
     everything
 }
