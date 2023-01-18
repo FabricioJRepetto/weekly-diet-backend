@@ -1,15 +1,16 @@
 import { Router } from "express"
 const router = Router()
 import {
-    logIn,
-    signUp,
     google,
-    autoLogIn
+    autoLogIn,
+    verifyToken,
+    userConfig,
+    updateConfig
 } from "../controllers/user_controller.js"
 
 router.get('/autologin', autoLogIn)
-router.post('/login', logIn)
-router.post('/signup', signUp)
+router.get('/config', verifyToken, userConfig)
+router.put('/config', verifyToken, updateConfig)
 router.post('/googlelogin', google)
 
 export { router }

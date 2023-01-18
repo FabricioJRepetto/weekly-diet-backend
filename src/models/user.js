@@ -13,7 +13,43 @@ const UserSchema = new Schema(
         user_id: String,
         picture: String,
         name: String,
-        password: String
+        password: String,
+        config: {
+            tutorials: {
+                activated: {
+                    type: Boolean,
+                    default: true
+                },
+                mainMenu: {
+                    type: Boolean,
+                    default: true
+                },
+                creationMenu: {
+                    type: Boolean,
+                    default: true
+                },
+                history: {
+                    type: Boolean,
+                    default: true
+                },
+                checkpoints: {
+                    type: Boolean,
+                    default: true
+                },
+                customMeals: {
+                    type: Boolean,
+                    default: true
+                },
+            },
+            height: {
+                type: Number,
+                default: 0
+            },
+            plateStyle: {
+                type: Boolean,
+                default: true
+            },
+        }
     },
     {
         versionKey: false,

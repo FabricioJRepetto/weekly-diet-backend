@@ -3,42 +3,6 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 const { CLIENT_ID } = process.env;
 
-const logIn = async (req, res, next) => {
-    try {
-        let { email, password } = req.body,
-            userFound = await User.findOne({ email })
-
-        if (!userFound) return res.json({ error: 'email incorrecto' })
-        if (userFound.password !== password) return res.json({ error: 'contraseña incorrecta' })
-
-        const token = jwt.sign({ user: userFound }, process.env.JWT_SECRET, {
-            expiresIn: 1000 * 60 * 60 * 24 * 7,
-        });
-
-        return res.json({ id: userFound.id, token })
-    } catch (err) {
-        next(err)
-    }
-}
-
-const signUp = async (req, res, next) => {
-    try {
-        let { email, password } = req.body,
-            alreadyExists = await User.findOne({ email })
-
-        if (alreadyExists) return res.json({ error: 'email en uso' })
-
-        const newUser = await User.create({
-            email,
-            password
-        })
-
-        return res.json({ user_id: newUser.id })
-    } catch (err) {
-        next(err)
-    }
-}
-
 const verifyGoogle = async (token) => {
     const client = new OAuth2Client(CLIENT_ID);
 
@@ -165,10 +129,87 @@ const verifyToken = async (req, res, next) => {
     }
 }
 
+const userConfig = async (req, res, next) => {
+    try {
+        const { id } = req?.user
+        if (!id) return res.json({ error: true, message: 'No user ID recibed' })
+
+        const user = await User.findOne({ user_id: id })
+
+        if (user && user?.config) {
+            console.log(user.config);
+            return res.json({ config: user.config })
+        } else {
+            if (!user) return res.json({ error: true, message: 'Usuario no encontrado' })
+
+            const aux = {
+                tutorials: {
+                    activated: true,
+                    mainMenu: true,
+                    creationMenu: true,
+                    history: true,
+                    checkpoints: true,
+                    customMeals: true
+                },
+                height: 0,
+            }
+
+            user.config = aux
+            await user.save()
+
+            return res.json({ config: aux })
+        }
+    } catch (err) {
+        next()
+    }
+}
+
+const updateConfig = async (req, res, next) => {
+    try {
+        const { id } = req?.user,
+            { height, tutorial, plateStyle } = req?.body
+
+        if (!id) return res.json({ error: true, message: 'No user ID recibed' })
+        if (!height && !tutorial && !plateStyle) return res.json({ error: true, message: 'No update field specified' })
+
+        const user = await User.findOne({ user_id: id })
+
+        if (height) {
+            user.config.height = height
+            await user.save()
+        } if (plateStyle) {
+            user.config.plateStyle = !user.config.plateStyle
+            await user.save()
+        } else {
+            if (tutorial === 'activated') {
+                const flag = !user.config.tutorials.activated
+                user.config.tutorials = {
+                    activated: flag,
+                    mainMenu: flag,
+                    creationMenu: flag,
+                    history: flag,
+                    checkpoints: flag,
+                    customMeals: flag
+                }
+                await user.save()
+
+            } else {
+                const flag = !user.config.tutorials[tutorial]
+                user.config.tutorials[tutorial] = flag
+                await user.save()
+            }
+        }
+        return res.json({ config: user.config })
+
+    } catch (err) {
+        next(err)
+    }
+}
+
 export {
-    logIn,
-    signUp,
     google,
     autoLogIn,
-    verifyToken
+    verifyToken,
+    userConfig,
+    updateConfig
 }
