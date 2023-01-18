@@ -134,7 +134,7 @@ const userConfig = async (req, res, next) => {
         const { id } = req?.user
         if (!id) return res.json({ error: true, message: 'No user ID recibed' })
 
-        const user = await User.findOne({ user_id: id })
+        const user = await User.findById(id)
 
         if (user && user?.config) {
             console.log(user.config);
@@ -172,7 +172,7 @@ const updateConfig = async (req, res, next) => {
         if (!id) return res.json({ error: true, message: 'No user ID recibed' })
         if (!height && !tutorial && !plateStyle) return res.json({ error: true, message: 'No update field specified' })
 
-        const user = await User.findOne({ user_id: id })
+        const user = await User.findById(id)
 
         if (height) {
             user.config.height = height
