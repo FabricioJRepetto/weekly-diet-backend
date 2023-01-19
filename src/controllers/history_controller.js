@@ -538,7 +538,6 @@ const deleteMealV2 = async (req, res, next) => {
 
         if (history) {
             let day = history.days.find(e => e._id.toString() === day_id)
-            // console.log(day);
             if (day) {
                 let aux = [...history.days]
                 aux = aux.map(day => {

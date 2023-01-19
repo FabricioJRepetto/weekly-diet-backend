@@ -137,7 +137,6 @@ const userConfig = async (req, res, next) => {
         const user = await User.findById(id)
 
         if (user && user?.config) {
-            console.log(user.config);
             return res.json({ config: user.config })
         } else {
             if (!user) return res.json({ error: true, message: 'Usuario no encontrado' })
