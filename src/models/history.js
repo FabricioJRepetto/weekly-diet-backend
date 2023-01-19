@@ -85,6 +85,7 @@ const HistorySchema = new Schema(
             {
                 name: String,
                 mix: Boolean,
+                cheatfood: Boolean,
                 list: String,
                 lists: [String],
                 ingredients: [{}]
