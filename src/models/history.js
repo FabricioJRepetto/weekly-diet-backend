@@ -27,6 +27,7 @@ const HistorySchema = new Schema(
                     vegetal: [String],
                     fruit: [String],
                     vegetalC: Boolean,
+                    cheatfood: Boolean,
                     empty: {
                         type: Boolean,
                         default: true
@@ -39,6 +40,7 @@ const HistorySchema = new Schema(
                     vegetal: [String],
                     fruit: [String],
                     vegetalC: Boolean,
+                    cheatfood: Boolean,
                     empty: {
                         type: Boolean,
                         default: true
@@ -48,6 +50,7 @@ const HistorySchema = new Schema(
                     foods: [String],
                     breakfast: [String],
                     fruit: [String],
+                    cheatfood: Boolean,
                     empty: {
                         type: Boolean,
                         default: true
@@ -57,6 +60,7 @@ const HistorySchema = new Schema(
                     foods: [String],
                     breakfast: [String],
                     fruit: [String],
+                    cheatfood: Boolean,
                     empty: {
                         type: Boolean,
                         default: true

@@ -210,7 +210,7 @@ const weekAnalistV2 = (history, today, start, createWeekDays) => {
 
             return {
                 vC,
-                cF: e.cheatFood.length,
+                cF: !!e.cheatFood.length ? 1 : 0,
                 wO: !!e.workOut.length ? 1 : 0
             }
         }
@@ -406,7 +406,7 @@ const addMealV2 = async (req, res, next) => {
 
         if (!id) return res.json({ error: 'user id no encontrada' })
         if (!meal) return res.json({ error: 'body.meal no encontrada' })
-        if (!meal.mealType) return res.json({ error: 'V2 no compatible, mealType no encontrada' })
+        if (!meal.mealType) return res.json({ error: 'mealType no encontrada' })
 
         const history = await History.findOne({ user: id })
 
@@ -416,8 +416,26 @@ const addMealV2 = async (req, res, next) => {
                 let aux = [...history.days]
                 aux = aux.map(day => {
                     if (day.date === meal.date) {
-                        if (isExtra) return { ...day, [meal.mealType]: meal.data, empty: false }
-                        else return { ...day, [meal.mealType]: { ...meal, empty: false }, empty: false }
+                        if (isExtra) {
+                            return {
+                                ...day,
+                                [meal.mealType]: meal.data,
+                                empty: false,
+                                cheatFood: [
+                                    ...day.cheatFood,
+                                    ...meal.cheatFoodName
+                                ]
+                            }
+                        }
+                        else return {
+                            ...day,
+                            [meal.mealType]: { ...meal, empty: false },
+                            empty: false,
+                            cheatFood: [
+                                ...day.cheatFood,
+                                ...meal.cheatFoodName
+                            ]
+                        }
                     } else return day
                 })
                 history.days = aux
