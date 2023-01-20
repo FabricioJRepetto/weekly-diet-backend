@@ -66,7 +66,6 @@ const HistorySchema = new Schema(
                         default: true
                     }
                 },
-                cheatFood: [String],
                 workOut: [String],
                 empty: {
                     type: Boolean,

@@ -202,15 +202,22 @@ const weekAnalistV2 = (history, today, start, createWeekDays) => {
 
         const extrasCounter = (e) => {
             let vC = 0
+            let cF = 0
 
             e.lunch.vegetalC && (vC += 1)
             e.dinner.vegetalC && (vC += 1)
             e.breakfast.vegetalC && (vC += 1)
             e.afternoonsnack.vegetalC && (vC += 1)
 
+
+            !!e.lunch.cheatfood.length && (cF += 1)
+            !!e.dinner.cheatfood.length && (cF += 1)
+            !!e.breakfast.cheatfood.length && (cF += 1)
+            !!e.afternoonsnack.cheatfood.length && (cF += 1)
+
             return {
                 vC,
-                cF: !!e.cheatFood.length ? 1 : 0,
+                cF,
                 wO: !!e.workOut.length ? 1 : 0
             }
         }
@@ -228,7 +235,6 @@ const weekAnalistV2 = (history, today, start, createWeekDays) => {
             if (eDate >= Start && eDate <= Today) {
 
                 if (eDate.getTime() === Today.getTime()) {
-                    // if (!aux.today) {
                     let mealsRegistered = []
 
                     for (const key in e) {
@@ -244,11 +250,7 @@ const weekAnalistV2 = (history, today, start, createWeekDays) => {
                         }
                     }
 
-                    aux.today = {
-                        ...e,
-                        mealsRegistered
-                    }
-                    // }
+                    aux.today = { ...e, mealsRegistered }
                 }
 
                 const {
@@ -420,21 +422,13 @@ const addMealV2 = async (req, res, next) => {
                             return {
                                 ...day,
                                 [meal.mealType]: meal.data,
-                                empty: false,
-                                cheatFood: [
-                                    ...day.cheatFood,
-                                    ...meal.cheatFoodName
-                                ]
+                                empty: false
                             }
                         }
                         else return {
                             ...day,
                             [meal.mealType]: { ...meal, empty: false },
-                            empty: false,
-                            cheatFood: [
-                                ...day.cheatFood,
-                                ...meal.cheatFoodName
-                            ]
+                            empty: false
                         }
                     } else return day
                 })
