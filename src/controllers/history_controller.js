@@ -122,8 +122,7 @@ const dayEmptyCheck = (day, target) => {
         day.lunch.empty &&
         day.afternoonsnack.empty &&
         day.dinner.empty &&
-        day.workOut.length < 1 &&
-        day.cheatFood.length < 1
+        day.workOut.length < 1
     ) {
         return true
     } else return false
