@@ -440,7 +440,7 @@ const addMealV2 = async (req, res, next) => {
             } else {
                 history.days.push(
                     {
-                        [meal.mealType]: { ...meal, empty: false },
+                        [meal.mealType]: isExtra ? meal.data : { ...meal, empty: false },
                         date: meal.date
                     }
                 )
