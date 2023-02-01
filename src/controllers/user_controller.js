@@ -86,7 +86,7 @@ const verifyJWT = async (token) => {
 const autoLogIn = async (req, res, next) => {
     try {
         const token = req.headers.authorization
-        if (!token) return res.json({ error: true, message: "No token recibed" })
+        if (!token) return res.json({ error: true, message: "No token received" })
 
         const { user, userFound } = await verifyJWT(token)
 
@@ -108,7 +108,7 @@ const autoLogIn = async (req, res, next) => {
 const verifyToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization
-        if (!token) return res.json({ error: true, message: "No token recibed" })
+        if (!token) return res.json({ error: true, message: "No token received" })
 
         const { user, userFound } = await verifyJWT(token)
 
@@ -132,7 +132,7 @@ const verifyToken = async (req, res, next) => {
 const userConfig = async (req, res, next) => {
     try {
         const { id } = req?.user
-        if (!id) return res.json({ error: true, message: 'No user ID recibed' })
+        if (!id) return res.json({ error: true, message: 'No user ID received' })
 
         const user = await User.findById(id)
 
@@ -168,7 +168,7 @@ const updateConfig = async (req, res, next) => {
         const { id } = req?.user,
             { height, tutorial, plateStyle } = req?.body
 
-        if (!id) return res.json({ error: true, message: 'No user ID recibed' })
+        if (!id) return res.json({ error: true, message: 'No user ID received' })
         if (!height && !tutorial && !plateStyle) return res.json({ error: true, message: 'No update field specified' })
 
         const user = await User.findById(id)

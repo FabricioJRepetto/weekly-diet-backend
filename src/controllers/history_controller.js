@@ -485,9 +485,9 @@ const editMealV2 = async (req, res, next) => {
         const { id } = req?.user,
             { meal, day_id, today, start } = req?.body
 
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!meal) return res.json({ error: 'meal not recibed' })
-        if (!day_id) return res.json({ error: 'day_id not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
+        if (!meal) return res.json({ error: 'meal not received' })
+        if (!day_id) return res.json({ error: 'day_id not received' })
         if (!meal.mealType) return res.json({ error: 'V2 no compatible, mealType no encontrada' })
 
         const history = await History.findOne({ user: id })
@@ -523,9 +523,9 @@ const deleteMealV2 = async (req, res, next) => {
         const { id } = req?.user,
             { day_id, mealType, today, start } = req?.query
 
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!day_id) return res.json({ error: 'day_id not recibed' })
-        if (!mealType) return res.json({ error: 'V2 no compatible, mealType not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
+        if (!day_id) return res.json({ error: 'day_id not received' })
+        if (!mealType) return res.json({ error: 'V2 no compatible, mealType not received' })
 
         const history = await History.findOne({ user: id })
 
@@ -559,7 +559,7 @@ const deleteMealV2 = async (req, res, next) => {
 const getFoods = async (req, res, next) => {
     try {
         const { id } = req?.user
-        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
 
         const history = await History.findOne({ user: id })
 
@@ -577,8 +577,8 @@ const addFood = async (req, res, next) => {
         const { id } = req?.user,
             { food } = req?.body
 
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!food) return res.json({ error: 'data (food) not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
+        if (!food) return res.json({ error: 'data (food) not received' })
 
         const history = await History.findOne({ user: id })
 
@@ -613,9 +613,9 @@ const editFood = async (req, res, next) => {
         const { id } = req?.user,
             { food, food_id } = req?.body
 
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!food) return res.json({ error: 'data (food) not recibed' })
-        if (!food_id) return res.json({ error: 'data (food_id) not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
+        if (!food) return res.json({ error: 'data (food) not received' })
+        if (!food_id) return res.json({ error: 'data (food_id) not received' })
 
         let vegC = food.ingredients.find(e => e.vegC),
             aux = { ...food, vegC: !!vegC }
@@ -650,8 +650,8 @@ const deleteFood = async (req, res, next) => {
         const { id } = req?.user,
             { food_id } = req?.query
 
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!food_id) return res.json({ error: 'data (food_id) not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
+        if (!food_id) return res.json({ error: 'data (food_id) not received' })
 
         const newHistory = await History.findOneAndUpdate(
             {
@@ -677,7 +677,7 @@ const getAllWeeksV2 = async (req, res, next) => {
     try {
         const { id } = req?.user
 
-        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
 
         const history = await History.findOne({ user: id })
 
@@ -738,7 +738,7 @@ const getCheckpoints = async (req, res, next) => {
     try {
         const { id } = req.user
 
-        if (!id) return res.json({ error: 'user id not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
 
         const history = await History.findOne({ user: id })
 
@@ -768,10 +768,10 @@ const addCheckpoint = async (req, res, next) => {
         const { id } = req.user,
             { checkpoint } = req.body
 
-        if (!id) return res.json({ error: 'user id not recibed' })
-        if (!checkpoint) return res.json({ error: 'data (checkpoint) not recibed' })
-        if (!checkpoint.weight) return res.json({ error: 'data (checkpoint.weight) not recibed' })
-        if (!checkpoint.date) return res.json({ error: 'data (checkpoint.date) not recibed' })
+        if (!id) return res.json({ error: 'user id not received' })
+        if (!checkpoint) return res.json({ error: 'data (checkpoint) not received' })
+        if (!checkpoint.weight) return res.json({ error: 'data (checkpoint.weight) not received' })
+        if (!checkpoint.date) return res.json({ error: 'data (checkpoint.date) not received' })
 
         const history = await History.findOne({ user: id })
 
